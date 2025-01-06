@@ -2,6 +2,18 @@ import { createContext, useContext, useEffect, useState } from "react";
 
 const MovieContext = createContext();
 
+export const useDebounce = (value, delay) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => setDebouncedValue(value), delay);
+
+    return () => clearTimeout(handler);
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 export const useMovieContext = () => useContext(MovieContext);
 
 const API_KEY = "d049f86f";

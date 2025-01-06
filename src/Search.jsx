@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useMovieContext } from "./MovieContext";
+import { useDebounce, useMovieContext } from "./MovieContext";
 
 const Search = () => {
   const { fetchMovies } = useMovieContext();
   const [query, setQuery] = useState("");
+  const debouncedQuery = useDebounce(query, 300);
 
   useEffect(() => {
-    fetchMovies(query);
-  }, [query]);
+    if (debouncedQuery) fetchMovies(debouncedQuery);
+  }, [debouncedQuery]);
 
   return (
     <input
