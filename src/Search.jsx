@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import { useDebounce, useMovieContext } from "./MovieContext";
 
 const Search = () => {
-  const { fetchMovies } = useMovieContext();
+  const { fetchMovies, handleCloseMovie } = useMovieContext();
   const [query, setQuery] = useState("");
   const debouncedQuery = useDebounce(query, 300);
 
   useEffect(() => {
+    handleCloseMovie();
+
     if (debouncedQuery) fetchMovies(debouncedQuery);
   }, [debouncedQuery]);
 
