@@ -2,7 +2,7 @@ import Loader from "./Loader";
 import ErrorMessage from "./ErrorMessage";
 import StarRating from "./StarRating";
 import { useMovieContext } from "./MovieContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const MovieDetails = () => {
   const [userRating, setUserRating] = useState(null);
@@ -49,6 +49,18 @@ const MovieDetails = () => {
     handleAddWatchedMovie(newWatchedMovie);
     handleCloseMovie();
   };
+
+  useEffect(() => {
+    const callback = (e) => {
+      if (e.code === "Escape") handleCloseMovie();
+    };
+
+    document.addEventListener("keydown", callback);
+
+    return () => {
+      document.removeEventListener("keydown", callback);
+    };
+  }, [handleCloseMovie]);
 
   return (
     <div className="details">
