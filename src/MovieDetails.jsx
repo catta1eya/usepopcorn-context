@@ -1,30 +1,31 @@
-import { useEffect, useState } from "react";
-import { API_KEY } from "./App";
 import Loader from "./Loader";
 import ErrorMessage from "./ErrorMessage";
 import StarRating from "./StarRating";
-import WatchedMovie from "./WatchedMovie";
+import { useMovieContext } from "./MovieContext";
+import { useState } from "react";
 
-const MovieDetails = ({
-  selectedId,
-  onCloseMovie,
-  onAddWatchedMovie,
-  watched,
-}) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [movie, setMovie] = useState({});
-  const [rating, setRating] = useState(null);
+const MovieDetails = () => {
+  const [userRating, setUserRating] = useState(null);
 
-  const isWatched = watched.map((movie) => movie.imdbId).includes(selectedId);
+  const {
+    selectedMovie,
+    handleCloseMovie,
+    handleAddWatchedMovie,
+    watched,
+    isMovieLoading,
+    errMovieQuery,
+  } = useMovieContext();
+
+  const isWatched = watched
+    .map((movie) => movie.imdbId)
+    .includes(selectedMovie.imdbId);
 
   const watchedRating = watched.find(
-    (movie) => movie.imdbId === selectedId
+    (movie) => movie.imdbId === selectedMovie.imdbId
   )?.userRating;
 
   const {
     Title: title,
-    Year: year,
     Poster: poster,
     Runtime: runtime,
     imdbRating,
@@ -33,57 +34,30 @@ const MovieDetails = ({
     Actors: actors,
     Director: director,
     Genre: genre,
-  } = movie;
+  } = selectedMovie;
 
   const handleAdd = () => {
     const newWatchedMovie = {
-      imdbId: selectedId,
+      imdbId: selectedMovie.imdbId,
       title,
       poster,
       imdbRating: Number(imdbRating),
       runtime: Number(runtime.split(" ").at(0)),
-      userRating: rating,
+      userRating,
     };
 
-    onAddWatchedMovie(newWatchedMovie);
-    onCloseMovie();
+    handleAddWatchedMovie(newWatchedMovie);
+    handleCloseMovie();
   };
-
-  useEffect(() => {
-    const fetchMovieDetails = async () => {
-      try {
-        setError(false);
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${API_KEY}&i=${selectedId}`
-        );
-
-        if (!res.ok) throw new Error("Failed to fetch movie details");
-
-        const data = await res.json();
-
-        if (data.Response === "False") throw new Error("No Results");
-
-        setMovie(data);
-      } catch (err) {
-        console.error(err.message);
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchMovieDetails();
-  }, [selectedId]);
 
   return (
     <div className="details">
-      {isLoading && <Loader />}
-      {error && <ErrorMessage message={error} />}
-      {!isLoading && !error && (
+      {isMovieLoading && <Loader />}
+      {errMovieQuery && <ErrorMessage />}
+      {!isMovieLoading && !errMovieQuery && (
         <>
           <header>
-            <button className="btn-back" onClick={onCloseMovie}>
+            <button className="btn-back" onClick={handleCloseMovie}>
               &larr;
             </button>
             <img src={poster} alt={`Poster of ${title} movie`} />
@@ -103,9 +77,9 @@ const MovieDetails = ({
                   <StarRating
                     maxRating={10}
                     size={24}
-                    onSetRating={setRating}
+                    onSetRating={setUserRating}
                   />
-                  {rating > 0 && (
+                  {userRating > 0 && (
                     <button className="btn-add" onClick={handleAdd}>
                       + Add to list
                     </button>

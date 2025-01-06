@@ -1,7 +1,10 @@
-const ErrorMessage = ({ message }) => {
+import { useMovieContext } from "./MovieContext";
+
+const ErrorMessage = () => {
+  const { errListQuery, errMovieQuery } = useMovieContext();
   return (
     <p className="error">
-      <span>⛔</span> {message}
+      <span>⛔</span> {errListQuery || errMovieQuery}
     </p>
   );
 };

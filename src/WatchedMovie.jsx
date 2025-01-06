@@ -1,4 +1,7 @@
-const WatchedMovie = ({ movie, onRemoveWatchedMovie }) => {
+import { useMovieContext } from "./MovieContext";
+
+const WatchedMovie = ({ movie }) => {
+  const { handleDeleteWatchedMovie } = useMovieContext();
   return (
     <li>
       <img src={movie.poster} alt={`${movie.title} poster`} />
@@ -19,7 +22,7 @@ const WatchedMovie = ({ movie, onRemoveWatchedMovie }) => {
         <button
           className="btn-delete"
           onClick={() => {
-            onRemoveWatchedMovie(movie.imdbId);
+            handleDeleteWatchedMovie(movie.imdbId);
           }}
         >
           X

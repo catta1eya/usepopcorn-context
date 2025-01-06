@@ -1,6 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useMovieContext } from "./MovieContext";
 
-const Search = ({ query, setQuery }) => {
+const Search = () => {
+  const { fetchMovies } = useMovieContext();
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    fetchMovies(query);
+  }, [query]);
+
   return (
     <input
       className="search"

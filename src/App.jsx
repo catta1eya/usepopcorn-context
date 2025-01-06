@@ -6,118 +6,47 @@ import Box from "./Box";
 import MoviesList from "./MoviesList";
 import WatchedMoviesList from "./WatchedMoviesList";
 import WatchedSummary from "./WatchedSummary";
-import { useEffect, useState } from "react";
 import Loader from "./Loader";
 import ErrorMessage from "./ErrorMessage";
 import MovieDetails from "./MovieDetails";
-
-export const API_KEY = "d049f86f";
+import { useMovieContext } from "./MovieContext";
 
 const App = () => {
-  const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [selectedId, setSelectedId] = useState(null);
-
-  const handleSelectMovie = (id) => {
-    setSelectedId((selectedId) => (id === selectedId ? null : id));
-  };
-
-  const handleCloseMovie = () => {
-    setSelectedId(null);
-  };
-
-  const handleAddWatchedMovie = (movie) => {
-    setWatched((watchedMovies) => [...watchedMovies, movie]);
-  };
-
-  const handleDeleteWatchedMovie = (id) => {
-    console.log("++id", id);
-    setWatched((watched) => watched.filter((movie) => movie.imdbId !== id));
-  };
-
-  /*
-  useEffect(() => {
-    console.log("After initial render");
-  }, []);
-
-  useEffect(() => {
-    console.log("After every render");
-  });
-
-  console.log("During render");
-
-  useEffect(() => {
-    console.log("D");
-  }, [query]);
-  */
-
-  useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        setError(false);
-        setIsLoading(true);
-        const res = await fetch(
-          `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`
-        );
-
-        if (!res.ok) throw new Error("Something went wrong");
-
-        const data = await res.json();
-
-        if (data.Response === "False") throw new Error("Movie not found");
-
-        setMovies(data.Search);
-      } catch (err) {
-        console.error(err.message);
-        setError(err.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (query.length < 3) {
-      setMovies([]);
-      setError("");
-      return;
-    }
-
-    fetchMovies();
-  }, [query]);
+  const {
+    selectedMovie,
+    errListQuery,
+    isListLoading,
+    isMovieLoading,
+    errMovieQuery,
+  } = useMovieContext();
 
   return (
     <>
       <Navbar>
-        <Search query={query} setQuery={setQuery} />
-        <Numresults movies={movies} />
+        <Search />
+        <Numresults />
       </Navbar>
       <Main>
         <Box>
-          {isLoading && <Loader />}
-          {!isLoading && !error && (
-            <MoviesList movies={movies} onSelectMovie={handleSelectMovie} />
-          )}
-          {error && <ErrorMessage message={error} />}
+          {isListLoading && <Loader />}
+          {!isListLoading && !errListQuery && <MoviesList />}
+          {errListQuery && <ErrorMessage />}
         </Box>
         <Box>
-          {selectedId ? (
-            <MovieDetails
-              selectedId={selectedId}
-              onCloseMovie={handleCloseMovie}
-              onAddWatchedMovie={handleAddWatchedMovie}
-              watched={watched}
-            />
-          ) : (
+          {isMovieLoading && <Loader />}
+          {!isMovieLoading && !errMovieQuery && (
             <>
-              <WatchedSummary watched={watched} />
-              <WatchedMoviesList
-                watched={watched}
-                onRemoveWatchedMovie={handleDeleteWatchedMovie}
-              />
+              {selectedMovie ? (
+                <MovieDetails />
+              ) : (
+                <>
+                  <WatchedSummary />
+                  <WatchedMoviesList />
+                </>
+              )}
             </>
           )}
+          {errMovieQuery && <ErrorMessage />}
         </Box>
       </Main>
     </>
