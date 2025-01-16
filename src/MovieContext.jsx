@@ -16,8 +16,6 @@ export const useDebounce = (value, delay) => {
 
 export const useMovieContext = () => useContext(MovieContext);
 
-const API_KEY = "d049f86f";
-
 export const MovieContextProvider = ({ children }) => {
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
@@ -60,7 +58,9 @@ export const MovieContextProvider = ({ children }) => {
       setErrListQuery(false);
       setIsListLoading(true);
       const res = await fetch(
-        `http://www.omdbapi.com/?apikey=${API_KEY}&s=${query}`
+        `http://www.omdbapi.com/?apikey=${
+          import.meta.env.VITE_API_KEY
+        }&s=${query}`
       );
 
       if (!res.ok) throw new Error("Something went wrong");
